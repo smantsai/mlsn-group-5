@@ -156,7 +156,7 @@ class DatasetBrowser:
             self._load_entries()
 
     def _find_zip_file(self) -> Path | None:
-        preferred = self.base_dir / "ai4mars_subset(1).zip"
+        preferred = self.base_dir / "ai4mars_subset.zip"
         if preferred.exists():
             return preferred
         zips = sorted(self.base_dir.glob("*.zip"))

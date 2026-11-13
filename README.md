@@ -19,7 +19,7 @@ Upload any terrain image—or browse images directly from the AI4Mars dataset ar
 ## Features
 
 - **Instant Confidence Thresholding**: Adjust the threshold slider (`0%–100%`) or presets in real time with zero server re-inference.
-- **Upload & Dataset Explorer**: Drag-and-drop any local image (`JPG`, `PNG`, `BMP`, `WEBP`), or search/browse `test`, `val`, and `train` splits directly from `ai4mars_subset(1).zip` + `sample_split_filtered.csv`.
+- **Upload & Dataset Explorer**: Drag-and-drop any local image (`JPG`, `PNG`, `BMP`, `WEBP`), or search/browse `test`, `val`, and `train` splits directly from `ai4mars_subset.zip` + `sample_split_filtered.csv`.
 - **Multiple View Modes**: `Overlay`, `Mask Only`, `Side-by-Side`, `Confidence Map`, and `vs Ground Truth` (with live accuracy and mIoU at the selected threshold).
 - **Pixel Inspector & Export**: Hover over any pixel to inspect coordinates, predicted class, confidence `%`, and ground truth; download thresholded overlay or transparent mask PNGs.
 
@@ -40,7 +40,7 @@ Upload any terrain image—or browse images directly from the AI4Mars dataset ar
     └── app.js                  # Client-side thresholding, rendering & stats
 ```
 
-> **Note on the dataset archive**: `*.zip` files (such as `ai4mars_subset(1).zip`, ~412 MB) are excluded in `.gitignore` because they exceed GitHub's 100 MB file limit. Image upload and segmentation work without the zip; place `ai4mars_subset(1).zip` in the project root if you also want to use the built-in Dataset Explorer and Ground Truth comparison.
+> **Note on the dataset archive**: `*.zip` files (such as `ai4mars_subset.zip`, ~412 MB) are excluded in `.gitignore` because they exceed GitHub's 100 MB file limit. Image upload and segmentation work without the zip; place `ai4mars_subset.zip` in the project root if you also want to use the built-in Dataset Explorer and Ground Truth comparison.
 
 ## Getting Started
 
