@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI4Mars SegFormer — Confidence-Thresholded Segmentation</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">MARS</div>
+        <div>
+          <h1>AI4Mars SegFormer Studio</h1>
+          <p id="modelMeta" class="subtitle">Loading model metadata...</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="randomTestBtn" class="btn btn-secondary" title="Load a random image from the test split">
+          Random Test Image
+        </button>
+        <label class="btn btn-primary upload-btn">
+          Upload Image
+          <input id="fileInput" type="file" accept="image/*" hidden />
+        </label>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar">
+        <!-- Upload dropzone -->
+        <section class="panel">
+          <h2>Input Source</h2>
+          <div id="dropZone" class="drop-zone">
+            <div class="drop-title">Drop an image here or click to browse</div>
+            <div class="drop-sub">Supports JPG, PNG, BMP, WEBP</div>
+          </div>
+          <div id="sourceInfo" class="source-info hidden"></div>
+        </section>
+
+        <!-- Threshold controls -->
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Confidence Threshold</h2>
+            <div class="threshold-input-wrap">
+              <input id="thresholdNumber" type="number" min="0" max="100" step="1" value="60" />
+              <span>%</span>
+            </div>
+          </div>
+          <input id="thresholdSlider" class="slider" type="range" min="0" max="100" step="1" value="60" />
+          <div class="preset-row">
+            <button class="preset-btn" data-threshold="0">0%</button>
+            <button class="preset-btn" data-threshold="50">50%</button>
+            <button class="preset-btn active" data-threshold="60">60%</button>
+            <button class="preset-btn" data-threshold="75">75%</button>
+            <button class="preset-btn" data-threshold="90">90%</button>
+            <button class="preset-btn" data-threshold="95">95%</button>
+          </div>
+          <p class="hint">
+            Pixels with model confidence &ge; <strong id="thresholdText">60%</strong> are labeled;
+            pixels below are left unlabeled.
+          </p>
+
+          <div class="subcontrol">
+            <div class="panel-header">
+              <label for="opacitySlider">Overlay Opacity</label>
+              <span id="opacityValue" class="mono">55%</span>
+            </div>
+            <input id="opacitySlider" class="slider" type="range" min="0" max="100" step="1" value="55" />
+          </div>
+        </section>
+
+        <!-- Class breakdown & toggles -->
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Classes &amp; Coverage</h2>
+            <span id="coverageBadge" class="badge">—</span>
+          </div>
+          <div id="classList" class="class-list"></div>
+        </section>
+
+        <!-- Dataset browser -->
+        <section class="panel dataset-panel">
+          <div class="panel-header">
+            <h2>Dataset Explorer</h2>
+            <span id="datasetTotal" class="mono muted">0</span>
+          </div>
+          <div class="split-tabs" id="splitTabs">
+            <button class="tab-btn active" data-split="test">Test</button>
+            <button class="tab-btn" data-split="val">Val</button>
+            <button class="tab-btn" data-split="train">Train</button>
+            <button class="tab-btn" data-split="all">All</button>
+          </div>
+          <input id="datasetSearch" class="search-input" type="search" placeholder="Filter by filename..." />
+          <div id="datasetList" class="dataset-list"></div>
+          <div class="pager">
+            <button id="prevPageBtn" class="btn btn-sm" disabled>Prev</button>
+            <span id="pageLabel" class="mono muted">Page 1</span>
+            <button id="nextPageBtn" class="btn btn-sm" disabled>Next</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <div class="stage-toolbar">
+          <div class="view-modes" id="viewModes">
+            <button class="mode-btn active" data-mode="overlay">Overlay</button>
+            <button class="mode-btn" data-mode="mask">Mask Only</button>
+            <button class="mode-btn" data-mode="side-by-side">Side-by-Side</button>
+            <button class="mode-btn" data-mode="confidence">Confidence Map</button>
+            <button class="mode-btn" data-mode="gt" id="gtModeBtn" disabled>vs Ground Truth</button>
+          </div>
+          <div class="export-actions">
+            <button id="downloadOverlayBtn" class="btn btn-sm" disabled>Download Overlay</button>
+            <button id="downloadMaskBtn" class="btn btn-sm" disabled>Download Mask</button>
+          </div>
+        </div>
+
+        <div id="metricsStrip" class="metrics-strip hidden"></div>
+
+        <div class="canvas-viewport" id="canvasViewport">
+          <div id="emptyState" class="empty-state">
+            <div class="empty-icon">&#9737;</div>
+            <h3>No image loaded</h3>
+            <p>Upload a Mars terrain image or select one from the Test / Val / Train dataset on the left.</p>
+          </div>
+          <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+            <span>Running SegFormer inference...</span>
+          </div>
+          <div id="canvasGrid" class="canvas-grid hidden">
+            <div class="canvas-card" id="primaryCard">
+              <div class="canvas-label" id="primaryLabel">Segmentation Overlay</div>
+              <canvas id="primaryCanvas"></canvas>
+            </div>
+            <div class="canvas-card hidden" id="secondaryCard">
+              <div class="canvas-label" id="secondaryLabel">Original Image</div>
+              <canvas id="secondaryCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <footer class="inspector-bar">
+          <div id="hoverReadout" class="mono">Hover over the image to inspect per-pixel class &amp; confidence.</div>
+          <div id="imageDims" class="mono muted"></div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
